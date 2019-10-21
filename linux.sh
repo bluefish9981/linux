@@ -1,7 +1,19 @@
 #!/bin/bash
+
+#formatting variables
 RED='\033[0;41;30m'
 STD='\033[0;0;39m'
 
+#installs dependencies
+installdependencies()
+{
+    echo "Installing dependencies..."
+    sudo apt-get install gnome-terminal -y | grep "random bullshit"
+    echo "Done!"
+    sleep 1
+}
+
+#username prompt
 promptuname()
 {
     echo -n "Enter the username and press [ENTER]: "
@@ -9,6 +21,7 @@ promptuname()
     echo $uname > username
 }
 
+#password prompt
 promptpasswd()
 {
     echo "Enter the password (matching "
@@ -17,6 +30,7 @@ promptpasswd()
     echo $passwd > password
 }
 
+#reads the user-submitted username and password, displayed when needed (info menu so far)
 displayuserinfo()
 {
     local uname
@@ -27,27 +41,17 @@ displayuserinfo()
     echo ""
 }
 
+#opens terminal, accepts one command and argument
 newterminal()
 {
-    local FILE1
-    local FILE2
-    FILE1=/etc/os-release
-    FILE2=/etc/lsb-release
-    if test -f "$FILE1"
-    then
-        echo "Debian" && sleep 1
-    elif test -f "$FILE2"
-    then
-        echo "Ubuntu" && sleep 1
-    else
-        echo "OS not found, defaulting Ubuntu" && sleep 2
-    fi
-    #for pack in `cat blacklist`
-    #do apt-get remove $pack -y | grep "random bullshit"
-    #echo "Uninstalling $pack  if found."
-    #done
+    gnome-terminal -e "$1" "$2"
+    echo "Command $1 $2 running in new terminal"
+    sleep 5
 }
 
+#checks information about current release
+#options include saving the output to the Desktop
+#should work for both debian and ubuntu
 checkrelease()
 {
     username=$(head -n 1 username)
@@ -78,11 +82,13 @@ checkrelease()
     fi
 }
 
+#will eventually do everything for you
 auto()
 {
     echo "Does nothing for now, returning to menu" && sleep 3 && start
 }
 
+#displays banner
 banner()
 {
     echo "   ____      _               ____  _             _   
@@ -94,6 +100,7 @@ banner()
     echo ""
 }
 
+#shows options for info menu
 infomenu()
 {
     clear
@@ -106,6 +113,7 @@ infomenu()
     echo "5) Exit"
 }
 
+#reads input for release menu
 readinfo()
 {
     local choice
@@ -114,18 +122,20 @@ readinfo()
 		1) promptpasswd && sleep 1 && info ;;
 		2) promptuname && sleep 1 && info ;;
         3) promptuname && promptpasswd && sleep 1 && info ;;
-        4) start ;;
+        4) start 0 3 ;;
 		5) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && info
 	esac
 }
 
+#calls info functions
 info()
 {
     infomenu
     readinfo
 }
 
+#shows options for release menu
 releasemenu()
 {
     clear
@@ -137,6 +147,7 @@ releasemenu()
     echo "5) Exit"
 }
 
+#reads input for release menu
 readrelease()
 {
     local choice
@@ -151,43 +162,78 @@ readrelease()
 	esac
 }
 
+#calls release functions
 release()
 {
     releasemenu
     readrelease
 }
 
+#shows options for main menu
 mainmenu()
 {
     clear
     banner
-    echo "1) Auto (not yet built)"
-    echo "2) Set user info"
-    echo "3) Remove blacklisted packages"
-    echo "4) Check release"
-    echo "5) Exit"
+
+    if [ "$1" = "1" ]
+    then
+        echo "MSG: Dependencies installed."
+        echo ""
+    elif [ "$1" = "2" ]
+    then
+        echo "MSG: Ready"
+        echo ""
+    elif
+    then [ "$1" = "3" ]
+        local uname
+        local passwd
+        passwd=$(head -n 1 password)
+        uname=$(head -n 1 username)
+        echo "Current info, username: $uname | password: $passwd"
+        echo ""
+    fi
+    
+    echo "1) Install dependencies"
+    echo "2) Auto (not yet built)"
+    echo "3) Set user info"
+    echo "4) Remove blacklisted packages"
+    echo "5) Check release"
+    echo "6) Exit"
 }
 
+#reads input for main menu
 readmain(){
 	local choice
 	read -p "Enter choice [ 1 - 5] " choice
 	case $choice in
-		1) auto ;;
-		2) info ;;
-        3) rmblacklist ;;
-        4) release ;;
-		5) exit 0;;
+		1) installdependencies && start 0 1 ;;
+        2) auto ;;
+		3) info ;;
+        4) rmblacklist ;;
+        5) release ;;
+		6) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
 	esac
 }
 
+#starts important functions(dependency installer and 
+#initializes the main menu and the maim menu input reader)
 start()
 {
-    mainmenu
+    if [ "$1" = "1" ]
+    then
+        installdependencies
+    fi
+    mainmenu "$2"
     readmain
 }
 
-start
+#master function, everything branches from this call
+start 1 2
+
+#test functions:
+
+#newterminal sudo ./rmblacklist.sh
 #newterminal
 #mainmenu
 #readmain
