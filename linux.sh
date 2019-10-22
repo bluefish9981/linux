@@ -196,7 +196,7 @@ mainmenu()
     echo "1) Install dependencies"
     echo "2) Auto (not yet built)"
     echo "3) Set user info"
-    echo "4) Remove blacklisted packages"
+    echo "4) Remove blacklisted packages(under construction, needs to be run in full windows)"
     echo "5) Check release"
     echo "6) Exit"
 }
