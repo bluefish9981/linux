@@ -8,7 +8,7 @@ STD='\033[0;0;39m'
 installdependencies()
 {
     echo "Installing dependencies..."
-    sudo apt-get install gnome-terminal -y | grep "random bullshit"
+    sudo apt-get install xterm -y | grep "random bullshit"
     echo "Done!"
     sleep 1
 }
@@ -44,9 +44,7 @@ displayuserinfo()
 #opens terminal, accepts one command and argument
 newterminal()
 {
-    gnome-terminal -e "$1" "$2"
-    echo "Command $1 $2 running in new terminal"
-    sleep 5
+    xterm -e "$1" "$2"
 }
 
 #checks information about current release
@@ -117,7 +115,7 @@ infomenu()
 readinfo()
 {
     local choice
-	read -p "Enter choice [ 1 - 5] " choice
+	read -p "Enter choice [ 1 - 5 ] " choice
 	case $choice in
 		1) promptpasswd && sleep 1 && info ;;
 		2) promptuname && sleep 1 && info ;;
@@ -151,7 +149,7 @@ releasemenu()
 readrelease()
 {
     local choice
-	read -p "Enter choice [ 1 - 5] " choice
+	read -p "Enter choice [ 1 - 5 ] " choice
 	case $choice in
 		1) checkrelease ;;
 		2) checkrelease 1 ;;
@@ -183,20 +181,24 @@ mainmenu()
     then
         echo "MSG: Ready"
         echo ""
-    elif
-    then [ "$1" = "3" ]
+    elif [ "$1" = "3" ]
+    then
         local uname
         local passwd
         passwd=$(head -n 1 password)
         uname=$(head -n 1 username)
         echo "Current info, username: $uname | password: $passwd"
         echo ""
+    elif [ "$1" = "4" ]
+    then
+        echo "MSG: Blacklisted packages (being) removed"
+        echo ""
     fi
     
     echo "1) Install dependencies"
     echo "2) Auto (not yet built)"
     echo "3) Set user info"
-    echo "4) Remove blacklisted packages(under construction, needs to be run in full windows)"
+    echo "4) Remove blacklisted packages"
     echo "5) Check release"
     echo "6) Exit"
 }
@@ -204,12 +206,12 @@ mainmenu()
 #reads input for main menu
 readmain(){
 	local choice
-	read -p "Enter choice [ 1 - 5] " choice
+	read -p "Enter choice [ 1 - 5 ] " choice
 	case $choice in
 		1) installdependencies && start 0 1 ;;
         2) auto ;;
 		3) info ;;
-        4) rmblacklist ;;
+        4) newterminal ./rmblacklist.sh & start 0 4 ;;
         5) release ;;
 		6) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
