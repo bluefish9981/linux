@@ -9,6 +9,7 @@ installdependencies()
 {
     echo "Installing dependencies..."
     sudo apt-get install xterm -y | grep "random bullshit"
+    sudo apt-get install ufw -y | grep "random bullshit"
     echo "Done!"
     sleep 1
 }
@@ -80,12 +81,6 @@ checkrelease()
     fi
 }
 
-#will eventually do everything for you
-auto()
-{
-    echo "Does nothing for now, returning to menu" && sleep 3 && start
-}
-
 #displays banner
 banner()
 {
@@ -119,7 +114,7 @@ readinfo()
 	case $choice in
 		1) promptpasswd && sleep 1 && info ;;
 		2) promptuname && sleep 1 && info ;;
-        3) promptuname && promptpasswd && sleep 1 && info ;;
+        3) setallinfo && info;;
         4) start 0 3 ;;
 		5) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && info
@@ -151,9 +146,9 @@ readrelease()
     local choice
 	read -p "Enter choice [ 1 - 5 ] " choice
 	case $choice in
-		1) checkrelease ;;
-		2) checkrelease 1 ;;
-        3) checkrelease && checkrelease 1 ;;
+		1) releasemenu && echo "" && checkrelease && echo ""  && readrelease ;;
+		2) releasemenu && echo "" && checkrelease 1 && echo ""  && readrelease ;;
+        3) releasemenu && echo "" && checkrelease && echo "" && checkrelease 1 && echo ""  && readrelease ;;
         4) start ;;
 		5) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && release
@@ -165,6 +160,12 @@ release()
 {
     releasemenu
     readrelease
+}
+
+#will eventually do everything for you
+auto()
+{
+    newterminal ./update.sh "1" & newterminal ./release.sh & newterminal ./rmmedia.sh & start 0 2
 }
 
 #shows options for main menu
@@ -193,28 +194,73 @@ mainmenu()
     then
         echo "MSG: Blacklisted packages (being) removed"
         echo ""
+    elif [ "$1" = "5" ]
+    then
+        echo "MSG: Media files (being) removed"
+        echo ""
+    elif [ "$1" = "6" ]
+    then
+        echo "MSG: Machine updated"
+        echo ""
+    elif [ "$1" = "7" ]
+    then
+        echo "MSG: Firewall installation verified and firewall enabled"
+        echo ""
     fi
     
     echo "1) Install dependencies"
-    echo "2) Auto (not yet built)"
+    echo "2) Auto"
     echo "3) Set user info"
-    echo "4) Remove blacklisted packages"
-    echo "5) Check release"
-    echo "6) Exit"
+    echo "4) Update"
+    echo "5) Firewall"
+    echo "6) Remove media files"
+    echo "7) Remove blacklisted packages"
+    echo "8) Check release"
+    echo "9) Exit"
 }
 
 #reads input for main menu
 readmain(){
 	local choice
-	read -p "Enter choice [ 1 - 5 ] " choice
+	read -p "Enter choice [ 1 - 9 ] " choice
 	case $choice in
 		1) installdependencies && start 0 1 ;;
         2) auto ;;
 		3) info ;;
-        4) newterminal ./rmblacklist.sh & start 0 4 ;;
-        5) release ;;
-		6) exit 0;;
+        4) newterminal ./update.sh & start 0 6;;
+        5) newterminal ./ufw.sh & start 0 7 ;;
+        6) newterminal ./rmmedia.sh & start 0 5 ;;
+        7) newterminal ./rmblacklist.sh & start 0 4 ;;
+        8) release ;;
+		9) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
+	esac
+}
+
+#asks dor all info
+setallinfo()
+{
+    promptuname && promptpasswd && sleep 1
+}
+
+#yes or no prompt
+yesorno()
+{
+    if [ $2 = "1" ]
+    then
+        echo ""
+        echo "Do you want to change user info?"
+    fi
+    echo "1) Yes"
+    echo "2) No"
+    echo ""
+    local choice
+	read -p "[ 1 or 2 ]: " choice
+    echo ""
+	case $choice in
+		1) "$1" ;;
+		2) echo "Continuing..." && sleep 2 ;;
+		*) echo -e "${RED}Error...${STD}" && sleep 2 && clear && displayuserinfo && yesorno setallinfo 1 && mainmenu 3 && readmain ;;
 	esac
 }
 
@@ -225,9 +271,15 @@ start()
     if [ "$1" = "1" ]
     then
         installdependencies
-    fi
+        echo ""
+        displayuserinfo
+        yesorno setallinfo 1
+        mainmenu 3
+        readmain
+    else
     mainmenu "$2"
     readmain
+    fi
 }
 
 #master function, everything branches from this call
