@@ -5,7 +5,6 @@ for ext in `cat extensions`
 do
 cd
 cd ..
-cd ..
 sudo find . -type f -name "*.$ext" -delete
 echo "Removing encountered $ext files"
 cd "$currentdir"
