@@ -5,12 +5,12 @@ RED='\033[0;41;30m'
 STD='\033[0;0;39m'
 currentdir=$(pwd)
 
-upscript()
+updscript()
 {
     echo "Updating script..."
     cd ..
-    rm -r linux
-    rm -r linux-master
+    rm -rf linux
+    rm -rf linux-master
     clear
     echo "Updating script..."
     git clone https://github.com/bluefish9981/linux.git
@@ -315,7 +315,7 @@ start()
 start 1 2
 #test functions:
 
-upscript
+#updscript
 #chmoddir
 #newterminal sudo ./rmblacklist.sh
 #newterminal
