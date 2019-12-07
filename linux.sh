@@ -3,6 +3,29 @@
 #formatting variables
 RED='\033[0;41;30m'
 STD='\033[0;0;39m'
+currentdir=$(pwd)
+
+upscript()
+{
+    echo "Updating script..."
+    cd ..
+    rm -r linux
+    rm -r linux-master
+    clear
+    echo "Updating script..."
+    git clone https://github.com/bluefish9981/linux.git
+    sleep 1
+}
+
+chmoddir()
+{
+    find "$currentdir" -type d -exec chmod 777 {} \;
+    find "$currentdir" -type f -exec chmod 777 {} \;
+    echo ""
+    echo "Writing permissions..."
+    sleep 1
+    start 0 8
+}
 
 #installs dependencies
 installdependencies()
@@ -206,6 +229,10 @@ mainmenu()
     then
         echo "MSG: Firewall installation verified and firewall enabled"
         echo ""
+    elif [ "$1" = "8" ]
+    then
+        echo "MSG: Permissions modified"
+        echo ""
     fi
     
     echo "1) Install dependencies"
@@ -216,7 +243,8 @@ mainmenu()
     echo "6) Remove media files"
     echo "7) Remove blacklisted packages"
     echo "8) Check release"
-    echo "9) Exit"
+    echo "9) Chmod the script"
+    echo "10) Exit"
 }
 
 #reads input for main menu
@@ -232,7 +260,8 @@ readmain(){
         6) newterminal ./rmmedia.sh & start 0 5 ;;
         7) newterminal ./rmblacklist.sh & start 0 4 ;;
         8) release ;;
-		9) exit 0;;
+        9) chmoddir ;;
+		10) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
 	esac
 }
@@ -284,9 +313,10 @@ start()
 
 #master function, everything branches from this call
 start 1 2
-
 #test functions:
 
+upscript
+#chmoddir
 #newterminal sudo ./rmblacklist.sh
 #newterminal
 #mainmenu
