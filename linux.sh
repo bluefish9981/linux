@@ -31,11 +31,23 @@ chmoddir()
 installdependencies()
 {
     #sudo dpkg --configure -a
-    sudo apt-key update
-    echo "Installing dependencies..."
+    #sudo apt-key update
+    echo "Searching for dependencies..."
+    instxterm=$(dpkg-query -W -f='${Status}' xterm 2>/dev/null | grep -c "ok installed")
+    instufw=$(dpkg-query -W -f='${Status}' ufw 2>/dev/null | grep -c "ok installed")
+    if [ "$instxterm" = "0" ]
+    then
     sudo apt-get install xterm -y | grep "random bullshit"
+    echo "Xterm installed/updated"
+    elif [ "$instufw" = "0" ]
+    then
     sudo apt-get install ufw -y | grep "random bullshit"
-    echo "Done!"
+    echo "UFW installed/updated"
+    else
+    echo "Depencencies already installed and updated!"
+    fi
+    #echo $instxterm
+    #echo $instufw
     sleep 1
 }
 
@@ -187,10 +199,47 @@ release()
     readrelease
 }
 
+resmenu()
+{
+    clear
+    banner
+    echo "1) Open checklists in browser"
+    echo "2) Open linux filesystem structure image"
+    echo "3) Back"
+    echo "4) Exit"
+}
+
+#reads input for release menu
+readres()
+{
+    local choice
+	read -p "Enter choice [ 1 - 4 ] " choice
+	case $choice in
+		1) checklist && start 0 9 && echo "" & resmenu && readres ;;
+		2) newterminal ./img.sh && echo "" & resmenu && readres ;;
+        3) start ;;
+		4) exit 0;;
+		*) echo -e "${RED}Error...${STD}" && sleep 2 & resources
+	esac
+}
+
+#calls resource functions
+resources()
+{
+    resmenu
+    readres
+}
+
 #will eventually do everything for you
 auto()
 {
     newterminal ./update.sh "1" & newterminal ./release.sh & newterminal ./rmmedia.sh & start 0 2
+}
+
+checklist()
+{
+    usr=`cat username`
+    sudo -u $usr xterm -e ./checklists.sh
 }
 
 #shows options for main menu
@@ -250,12 +299,13 @@ mainmenu()
     echo "7) Remove blacklisted packages"
     echo "8) Check release"
     echo "9) Chmod the script"
-    echo "10) Open checklists in browser"
+    echo "10) Resources"
     echo "11) Exit"
 }
 
 #reads input for main menu
 readmain(){
+    usr="cat username"
 	local choice
 	read -p "Enter choice [ 1 - 11 ] " choice
 	case $choice in
@@ -268,7 +318,7 @@ readmain(){
         7) newterminal ./rmblacklist.sh & start 0 4 ;;
         8) release ;;
         9) chmoddir ;;
-        10) xterm -e ./checklists.sh & start 0 9 ;;
+        10) resources ;;
 		11) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
 	esac
