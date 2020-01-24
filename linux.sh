@@ -30,6 +30,8 @@ chmoddir()
 #installs dependencies
 installdependencies()
 {
+    #sudo dpkg --configure -a
+    sudo apt-key update
     echo "Installing dependencies..."
     sudo apt-get install xterm -y | grep "random bullshit"
     sudo apt-get install ufw -y | grep "random bullshit"
@@ -223,7 +225,7 @@ mainmenu()
         echo ""
     elif [ "$1" = "6" ]
     then
-        echo "MSG: Machine updated"
+        echo "MSG: Machine updating"
         echo ""
     elif [ "$1" = "7" ]
     then
@@ -232,6 +234,10 @@ mainmenu()
     elif [ "$1" = "8" ]
     then
         echo "MSG: Permissions modified"
+        echo ""
+    elif [ "$1" = "9" ]
+    then
+        echo "MSG: Checklists opened"
         echo ""
     fi
     
@@ -244,13 +250,14 @@ mainmenu()
     echo "7) Remove blacklisted packages"
     echo "8) Check release"
     echo "9) Chmod the script"
-    echo "10) Exit"
+    echo "10) Open checklists in browser"
+    echo "11) Exit"
 }
 
 #reads input for main menu
 readmain(){
 	local choice
-	read -p "Enter choice [ 1 - 9 ] " choice
+	read -p "Enter choice [ 1 - 11 ] " choice
 	case $choice in
 		1) installdependencies && start 0 1 ;;
         2) auto ;;
@@ -261,7 +268,8 @@ readmain(){
         7) newterminal ./rmblacklist.sh & start 0 4 ;;
         8) release ;;
         9) chmoddir ;;
-		10) exit 0;;
+        10) xterm -e ./checklists.sh & start 0 9 ;;
+		11) exit 0;;
 		*) echo -e "${RED}Error...${STD}" && sleep 2 && start
 	esac
 }
